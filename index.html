@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECO Budget — Smart Finance and Living System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16261d;
+    --paper:#f2f0e6;
+    --paper-2:#e9e6d8;
+    --pine:#1f3d2b;
+    --pine-2:#2c5940;
+    --leaf:#4f8b63;
+    --gold:#c79a3d;
+    --gold-2:#e0b458;
+    --coral:#c2542f;
+    --line:#d8d3c0;
+    --shadow-sm: 0 1px 2px rgba(22,38,29,0.08);
+    --shadow-md: 0 10px 24px rgba(22,38,29,0.10);
+    --shadow-lg: 0 30px 60px rgba(22,38,29,0.32);
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);}
+  h1,h2,h3{font-family:var(--serif); letter-spacing:-0.01em; margin:0;}
+  .num{font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  button{font-family:var(--sans); cursor:pointer;}
+  input,select,textarea{font-family:var(--sans);}
+  a{color:inherit;}
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible{
+    outline:2px solid var(--gold-2); outline-offset:2px;
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+
+  /* ===== Auth screen ===== */
+  @keyframes authIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  #authScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(79,139,99,0.22), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(199,154,61,0.20), transparent 45%),
+      radial-gradient(circle at 50% 100%, rgba(79,139,99,0.12), transparent 55%),
+      var(--pine);
+    padding:24px;
+  }
+  .auth-card{
+    width:100%; max-width:420px; background:var(--paper);
+    border-radius:10px; padding:38px 34px; box-shadow:var(--shadow-lg);
+    border:1px solid var(--line); border-top:3px solid var(--gold);
+    animation:authIn 0.5s ease-out both;
+  }
+  .auth-brand{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .auth-brand .mark{
+    font-size:1.35rem; width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+    background:var(--pine); border-radius:50%; box-shadow:var(--shadow-sm); flex-shrink:0;
+  }
+  .auth-brand h1{font-size:1.55rem; color:var(--pine); font-weight:600;}
+  .auth-tag{font-size:0.84rem; color:#5c5748; margin:0 0 24px; font-style:italic;}
+  .auth-tabs{display:flex; border-bottom:1px solid var(--line); margin-bottom:20px;}
+  .auth-tab{flex:1; padding:9px 0; text-align:center; background:none; border:none; font-size:0.88rem; color:#7a7460; border-bottom:2px solid transparent; transition:color 0.15s;}
+  .auth-tab.active{color:var(--pine); border-bottom-color:var(--gold); font-weight:600;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:0.78rem; color:#6b6553; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em;}
+  .field input{width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:5px; background:#fff; font-size:0.92rem; color:var(--ink); transition:border-color 0.15s, box-shadow 0.15s;}
+  .field input:focus{outline:none; border-color:var(--leaf); box-shadow:0 0 0 3px rgba(79,139,99,0.15);}
+  .auth-err{color:var(--coral); font-size:0.82rem; margin:-4px 0 12px; min-height:1em;}
+  .btn-primary{
+    width:100%; padding:12px; border:none; border-radius:6px; background:var(--pine); color:#f5f2e6;
+    font-size:0.92rem; font-weight:600; letter-spacing:0.02em; transition:background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow:var(--shadow-sm);
+  }
+  .btn-primary:hover{background:var(--pine-2); box-shadow:var(--shadow-md); transform:translateY(-1px);}
+  .btn-primary:active{transform:translateY(0);}
+  .auth-switch{margin-top:16px; font-size:0.82rem; text-align:center; color:#6b6553;}
+  .auth-switch button{background:none; border:none; color:var(--pine); font-weight:600; text-decoration:underline; padding:0; font-size:0.82rem;}
+  .hidden{display:none !important;}
+
+  /* ===== App shell ===== */
+  #appScreen{display:grid; grid-template-columns:236px 1fr; min-height:100vh;}
+  .spine{
+    background:
+      radial-gradient(circle at 20% 0%, rgba(224,180,88,0.10), transparent 50%),
+      var(--pine);
+    color:#e9e6d8; padding:22px 18px; display:flex; flex-direction:column;
+    border-right:6px solid var(--gold);
+  }
+  .spine-brand{font-family:var(--serif); font-size:1.2rem; font-weight:600; margin-bottom:2px;}
+  .spine-tag{font-size:0.68rem; color:#a8c4b0; margin-bottom:20px; letter-spacing:0.03em;}
+  .greet-card{background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14); border-radius:6px; padding:13px 14px; margin-bottom:18px;}
+  .greet-hello{font-size:1rem; font-weight:700; margin-bottom:2px;}
+  .greet-sub{font-size:0.72rem; color:#a8c4b0;}
+  .spine h4{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#a8c4b0; margin:14px 0 6px;}
+  .spine .field-label{font-size:0.74rem; color:#cfe3d5; margin:8px 0 3px;}
+  .spine .input{width:100%; padding:7px 8px; border-radius:5px; border:1px solid #3c5b48; background:#183a29; color:#eef1e8; font-size:0.82rem; transition:border-color 0.15s;}
+  .spine .input:focus{outline:none; border-color:var(--gold-2);}
+  .spine-btn{margin-top:10px; padding:7px 10px; border-radius:5px; border:1px solid #4a6b57; background:transparent; color:#e9e6d8; font-size:0.78rem; transition:background 0.15s, border-color 0.15s;}
+  .spine-btn:hover{background:rgba(255,255,255,0.09); border-color:#6b8b78;}
+  .spine-foot{margin-top:auto; padding-top:14px; border-top:1px solid rgba(255,255,255,0.12);}
+  .logout-btn{width:100%; padding:8px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); background:transparent; color:#f0ded0; font-size:0.8rem; transition:background 0.15s;}
+  .logout-btn:hover{background:rgba(255,255,255,0.08);}
+
+  .main{padding:24px 30px 44px;}
+  .main-header{display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:14px;}
+  .big-title{font-size:1.8rem; color:var(--pine); font-weight:600;}
+  .sub-title{margin:4px 0 0; font-size:0.88rem; color:#635c48;}
+
+  .period-bar{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); border-radius:999px; padding:5px 6px; box-shadow:var(--shadow-sm);}
+  .period-btn{border:none; background:transparent; padding:6px 12px; border-radius:999px; font-size:0.8rem; color:#6b6553; transition:background 0.15s, color 0.15s;}
+  .period-btn.active{background:var(--pine); color:#f2f0e6;}
+  .period-nav{border:none; background:transparent; font-size:0.9rem; color:var(--pine); padding:2px 6px; border-radius:4px;}
+  .period-nav:hover{background:var(--paper-2);}
+  .period-range{font-size:0.76rem; color:#7a7460; margin-left:4px; font-family:var(--mono);}
+
+  .tabs{margin:16px 0 16px; display:inline-flex; border-bottom:1px solid var(--line); gap:4px;}
+  .tab-btn{border:none; background:transparent; padding:8px 14px; font-size:0.85rem; color:#7a7460; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color 0.15s;}
+  .tab-btn.active{color:var(--pine); border-bottom-color:var(--gold); font-weight:600;}
+  .tab-btn:hover{color:var(--pine);}
+
+  .card{background:#fff; border:1px solid var(--line); border-radius:8px; padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow-sm);}
+  .card h2{font-size:1.05rem; color:var(--pine); margin-bottom:10px; font-weight:600;}
+  .card h3{font-size:0.92rem; color:var(--pine); margin-bottom:8px; font-weight:600;}
+
+  .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-bottom:16px;}
+  .kpi{border-left:3px solid var(--leaf); background:linear-gradient(180deg, rgba(79,139,99,0.05), #fff 60%); display:flex; flex-direction:column;}
+  .kpi .kpi-icon{font-size:1rem; margin-right:3px;}
+  .kpi.expense{border-left-color:var(--coral); background:linear-gradient(180deg, rgba(194,84,47,0.06), #fff 60%);}
+  .kpi.savings{background:linear-gradient(180deg, rgba(199,154,61,0.08), #fff 60%);}
+  .kpi.carbon{border-left-color:var(--gold); background:linear-gradient(180deg, rgba(199,154,61,0.08), #fff 60%);}
+  .kpi h3{margin:0 0 4px; font-size:0.76rem; text-transform:uppercase; letter-spacing:0.05em; color:#8a8368; font-family:var(--sans); font-weight:600;}
+  .kpi-value{margin:0; font-size:1.35rem; font-weight:700; font-family:var(--mono);}
+  .kpi-sub{margin:4px 0 0; font-size:0.74rem; color:#8a8368;}
+
+  .rings-row{display:flex; gap:28px; flex-wrap:wrap; align-items:center;}
+  .ring-block{text-align:center;}
+  .ring-label{font-size:0.78rem; color:#6b6553; margin-top:6px;}
+  .ring-pct{font-family:var(--mono); font-size:1.05rem; font-weight:700; fill:var(--pine);}
+
+  .stars-row{margin-top:14px; text-align:center;}
+  .stars{font-size:1.6rem; letter-spacing:3px;}
+  .star-on{color:var(--gold); display:inline-block; animation:starPop 0.35s ease-out both;}
+  .star-off{color:#ddd7c2;}
+  .stars-msg{font-size:0.85rem; margin-top:4px; color:#5c5748;}
+  @keyframes starPop{ 0%{transform:scale(0.4); opacity:0;} 70%{transform:scale(1.15);} 100%{transform:scale(1); opacity:1;} }
+
+  table{width:100%; border-collapse:collapse; font-size:0.85rem;}
+  table thead{background:var(--paper-2);}
+  table th, table td{padding:8px 9px; border-bottom:1px solid var(--line); text-align:left;}
+  table th{font-weight:600; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.03em; color:#6b6553;}
+  table tbody tr{transition:background 0.12s;}
+  table tbody tr:hover{background:#fbfaf4;}
+  .amt-income{color:var(--pine-2); font-family:var(--mono);}
+  .amt-expense{color:var(--coral); font-family:var(--mono);}
+  .del-btn{border:none; background:none; color:#a89f80; font-size:0.9rem; border-radius:4px; padding:2px 5px; transition:color 0.15s, background 0.15s;}
+  .del-btn:hover{color:var(--coral); background:rgba(194,84,47,0.08);}
+  .empty-note{color:#8a8368; font-size:0.85rem; padding:6px 0;}
+
+  .form{display:flex; flex-direction:column; gap:10px;}
+  .form-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .form-group{flex:1 1 160px; display:flex; flex-direction:column;}
+  .form-group label{font-size:0.76rem; color:#6b6553; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.03em;}
+  .form-group input, .form-group select, .form-group textarea{padding:8px 9px; border:1px solid var(--line); border-radius:5px; font-size:0.88rem; background:#fdfcf7; transition:border-color 0.15s, box-shadow 0.15s;}
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus{outline:none; border-color:var(--leaf); box-shadow:0 0 0 3px rgba(79,139,99,0.13);}
+
+  .type-toggle{display:inline-flex; border:1px solid var(--line); border-radius:999px; padding:3px; margin-bottom:10px;}
+  .type-toggle button{border:none; background:transparent; padding:6px 16px; border-radius:999px; font-size:0.82rem; color:#6b6553; transition:background 0.15s, color 0.15s;}
+  .type-toggle button.active-income{background:var(--pine-2); color:#fff;}
+  .type-toggle button.active-expense{background:var(--coral); color:#fff;}
+
+  .btn{padding:9px 18px; border:none; border-radius:999px; background:var(--pine); color:#f2f0e6; font-size:0.85rem; font-weight:600; align-self:flex-start; transition:background 0.15s, box-shadow 0.15s, transform 0.1s; box-shadow:var(--shadow-sm);}
+  .btn:hover{background:var(--pine-2); box-shadow:var(--shadow-md); transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+
+  .badge{display:inline-block; padding:4px 10px; border-radius:999px; background:var(--paper-2); color:var(--pine); font-size:0.74rem; margin:0 6px 6px 0; border:1px solid var(--line);}
+  .tip-list{padding-left:18px; font-size:0.86rem; color:#4a4638;}
+
+  /* ---- Chat bubbles for the Eco-Finance Assistant ---- */
+  .chat-window{max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:4px 2px 10px; margin-bottom:12px;}
+  .chat-empty{color:#8a8368; font-size:0.85rem; text-align:center; padding:22px 10px;}
+  .chat-bubble{max-width:84%; padding:10px 14px; border-radius:14px; font-size:0.87rem; line-height:1.5; white-space:pre-wrap;}
+  .chat-bubble.user{align-self:flex-end; background:var(--pine); color:#f5f2e6; border-bottom-right-radius:4px;}
+  .chat-bubble.bot{align-self:flex-start; background:#f4faf5; border:1px solid #cfe3d5; color:var(--ink); border-bottom-left-radius:4px;}
+  .chat-input-row{display:flex; gap:8px;}
+  .chat-input-row input{flex:1; padding:10px 14px; border:1px solid var(--line); border-radius:999px; font-size:0.88rem; background:#fdfcf7; transition:border-color 0.15s, box-shadow 0.15s;}
+  .chat-input-row input:focus{outline:none; border-color:var(--leaf); box-shadow:0 0 0 3px rgba(79,139,99,0.13);}
+  .chat-input-row .btn{border-radius:999px; align-self:auto;}
+  .chat-hint{font-size:0.78rem; color:#8a8368; margin:-4px 0 12px;}
+
+  @media(max-width:880px){
+    #appScreen{grid-template-columns:1fr;}
+    .spine{flex-direction:row; flex-wrap:wrap; align-items:center; border-right:none; border-bottom:6px solid var(--gold);}
+    .spine-foot{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== BERT-family embedding model (runs fully in-browser, no server/API key) =====
+     Uses Xenova/all-MiniLM-L6-v2: a distilled-from-BERT sentence encoder, chosen
+     because it is small enough for a browser (~25MB) and — unlike raw bert-base
+     CLS embeddings — is actually trained to make semantically similar sentences
+     land close together, which is what we need for matching free-typed text. -->
+<script type="module">
+  import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+  env.allowLocalModels = false;
+  // file:// pages (opened by double-clicking the HTML file) often block the
+  // Cache API / IndexedDB that transformers.js normally uses to cache the
+  // downloaded model — that throws and makes the whole load fail. Turning
+  // caching off makes it re-download each session instead, but it actually
+  // works when opened as a local file.
+  env.useBrowserCache = false;
+
+  let extractorPromise = null;
+  function getExtractor(){
+    if(!extractorPromise){
+      extractorPromise = pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+    }
+    return extractorPromise;
+  }
+
+  // Returns a plain array of numbers (the sentence embedding) for a piece of text.
+  window.__bertEmbed = async function(text){
+    const extractor = await getExtractor();
+    const output = await extractor(text, { pooling: 'mean', normalize: true });
+    return Array.from(output.data);
+  };
+
+  // Resolves true once the model has downloaded & is ready, false if it failed
+  // (e.g. no internet) — the app falls back to plain keyword matching in that case.
+  window.__bertReady = getExtractor().then(()=>true).catch(err=>{
+    console.error('BERT model failed to load, falling back to keyword mode:', err);
+    return false;
+  });
+</script>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand"><span class="mark">🌿</span><h1>ECO Budget</h1></div>
+    <p class="auth-tag">Smart Finance and Living System — in one ledger.</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTabBtn" onclick="switchAuthTab('login')">Log in</button>
+      <button class="auth-tab" id="registerTabBtn" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <!-- Login form -->
+    <div id="loginForm">
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      <div class="auth-err" id="loginErr"></div>
+      <button class="btn-primary" onclick="handleLogin()">Log in</button>
+      <p class="auth-switch">New here? <button onclick="switchAuthTab('register')">Create an account</button></p>
+    </div>
+
+    <!-- Register form -->
+    <div id="registerForm" class="hidden">
+      <div class="field"><label>Your name</label><input type="text" id="regName" placeholder="Riya Sharma"></div>
+      <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="regPassword" placeholder="At least 10 characters, with a number"></div>
+      <div class="auth-err" id="regErr"></div>
+      <button class="btn-primary" onclick="handleRegister()">Create account</button>
+      <p class="auth-switch">Already registered? <button onclick="switchAuthTab('login')">Log in</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP SCREEN ===================== -->
+<div id="appScreen" class="hidden">
+  <aside class="spine">
+    <div class="spine-brand">🌿 ECO Budget</div>
+    <div class="spine-tag">Smart Finance and Living System</div>
+
+    <div class="greet-card">
+      <div class="greet-hello" id="greetHello">Hello!</div>
+      <div class="greet-sub" id="greetSub">Let's see how your month is going.</div>
+    </div>
+
+    <h4>Goals</h4>
+    <label class="field-label">Monthly Savings Target (₹)</label>
+    <input type="number" class="input" id="settingSavingsTarget" min="0">
+
+    <label class="field-label">Monthly Carbon Target (kg CO₂e)</label>
+    <input type="number" class="input" id="settingCarbonTarget" min="0">
+
+    <label class="field-label">Goal Style</label>
+    <select class="input" id="settingGoalStyle">
+      <option value="balanced">Balanced (money + carbon)</option>
+      <option value="money">Save Money</option>
+      <option value="eco">Eco-first</option>
+    </select>
+
+    <button class="spine-btn" onclick="saveSettings()">💾 Save goals</button>
+    <button class="spine-btn" onclick="clearAllData()">🧹 Clear all data</button>
+
+    <h4 style="margin-top:18px;">🤖 AI Assistant</h4>
+    <p style="font-size:0.72rem; color:#8a8368; margin:0; line-height:1.4;">
+      Powered by Gemini through this app's own backend server — the API key
+      lives only on the server and is never sent to or stored in your browser.
+      If the backend isn't running, the assistant still works using its
+      built-in offline matching.
+    </p>
+
+    <div class="spine-foot">
+      <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-header">
+      <div>
+        <h1 class="big-title">Overview</h1>
+        <p class="sub-title">Track what you earn, what you spend, and the planet's cost of it.</p>
+      </div>
+      <div class="period-bar">
+        <button class="period-nav" onclick="shiftPeriod(-1)">‹</button>
+        <button class="period-btn" data-period="day" onclick="setPeriod('day')">Day</button>
+        <button class="period-btn active" data-period="month" onclick="setPeriod('month')">Month</button>
+        <button class="period-btn" data-period="year" onclick="setPeriod('year')">Year</button>
+        <button class="period-nav" onclick="shiftPeriod(1)">›</button>
+        <span class="period-range" id="periodRange"></span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">📊 Overview</button>
+      <button class="tab-btn" data-tab="add" onclick="switchTab('add')">➕ Add Income / Expense</button>
+      <button class="tab-btn" data-tab="insights" onclick="switchTab('insights')">🔍 Insights & Assistant</button>
+    </div>
+
+    <!-- TAB: OVERVIEW -->
+    <section id="tab-overview">
+      <div class="kpi-grid">
+        <div class="card kpi">
+          <h3><span class="kpi-icon">💰</span> Income</h3>
+          <p class="kpi-value num" id="kpiIncome">₹0</p>
+        </div>
+        <div class="card kpi expense">
+          <h3><span class="kpi-icon">💸</span> Expenses</h3>
+          <p class="kpi-value num" id="kpiExpense">₹0</p>
+          <p class="kpi-sub" id="kpiExpenseSub">0% of income</p>
+        </div>
+        <div class="card kpi savings">
+          <h3><span class="kpi-icon">🏦</span> Net Savings</h3>
+          <p class="kpi-value num" id="kpiSavings">₹0</p>
+          <p class="kpi-sub" id="kpiSavingsSub">0% saved</p>
+        </div>
+        <div class="card kpi carbon">
+          <h3><span class="kpi-icon">🌍</span> Carbon Footprint</h3>
+          <p class="kpi-value num" id="kpiCarbon">0 kg CO₂e</p>
+          <p class="kpi-sub" id="kpiCarbonSub">0% of target</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🏆 Sustainability & Savings Score</h2>
+        <div class="rings-row">
+          <div class="ring-block" id="savingsRingWrap"></div>
+          <div class="ring-block" id="carbonRingWrap"></div>
+          <div style="flex:1; min-width:180px;">
+            <p class="kpi-value num" id="ecoScore" style="font-size:1.6rem;">0 / 100</p>
+            <p id="ecoScoreText" style="font-size:0.88rem; margin:2px 0 0;"></p>
+          </div>
+        </div>
+        <div class="stars-row">
+          <div class="stars" id="starsRow"></div>
+          <p class="stars-msg" id="starsMsg"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🧾 Transactions This Period</h2>
+        <div id="txnTableWrap"></div>
+      </div>
+
+      <div class="card">
+        <h2>💸 Expense by Category</h2>
+        <div id="categoryTableWrap"></div>
+      </div>
+    </section>
+
+    <!-- TAB: ADD -->
+    <section id="tab-add" class="hidden">
+      <div class="card">
+        <h2>🏷️ Manage Categories</h2>
+        <p class="sub-title" style="margin:0 0 12px;">Add your own income sources or expense categories — they'll show up in the dropdown below. New expense categories need a carbon factor (how many kg of CO₂e are released per ₹1 spent in that category).</p>
+        <div class="type-toggle">
+          <button id="catTypeIncomeBtn" onclick="setCatManageType('income')">Income Source</button>
+          <button id="catTypeExpenseBtn" class="active-expense" onclick="setCatManageType('expense')">Expense Category</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Name</label><input type="text" id="newCatName" placeholder="e.g. Pets, Subscriptions, Rent"></div>
+          <div class="form-group" id="newCatFactorWrap"><label>Carbon Factor (kg CO₂e / ₹1)</label><input type="number" id="newCatFactor" min="0" step="0.01" value="0.10"></div>
+        </div>
+        <button class="btn" onclick="addCustomCategory()">➕ Add Category</button>
+        <div id="customCatList" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>🍎 Manage Items</h2>
+        <p class="sub-title" style="margin:0 0 12px;">Add specific items inside any expense category, grouped into a subcategory (e.g. Food → Vegetables → Potato). Pick a real-world unit (kg, km, litres, kWh) for physically accurate carbon accounting, or leave it as "₹ spent" when there's no natural unit.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="subItemCategorySelect" onchange="renderSubItemList(); populateSubItemGroupSelect();"></select>
+          </div>
+          <div class="form-group">
+            <label>Subcategory</label>
+            <select id="newSubItemGroupSelect" onchange="handleGroupSelectChange()"></select>
+            <input type="text" id="newSubItemGroupNew" class="hidden" placeholder="Type new subcategory name" style="margin-top:6px;">
+          </div>
+          <div class="form-group"><label>Item Name</label><input type="text" id="newSubItemName" placeholder="e.g. Potato, Diesel Car"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Unit</label>
+            <select id="newSubItemUnit">
+              <option value="">₹ spent (no physical unit)</option>
+              <option value="kg">kg</option>
+              <option value="km">km</option>
+              <option value="liter">litres</option>
+              <option value="kWh">kWh (electricity units)</option>
+              <option value="item">item(s) / night(s)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Carbon Factor (kg CO₂e per unit above)</label><input type="number" id="newSubItemFactor" min="0" step="0.0001" value="0.10"></div>
+        </div>
+        <button type="button" class="btn" style="background:var(--pine, #2f5233);" onclick="autoCalculateItemFactor()">🤖 Auto-Calculate Carbon Factor</button>
+        <button type="button" class="spine-btn" style="margin-left:6px; padding:8px 14px; font-size:0.85rem;" onclick="toggleFactorCalc()">🧮 I have my own data instead</button>
+        <p id="autoCalcResult" style="margin:8px 0 0; font-size:0.85rem; color:#8a8368;"></p>
+        <div id="factorCalcWrap" class="hidden" style="margin:10px 0 12px; padding:10px 12px; background:#f4faf5; border:1px solid #cfe3d5; border-radius:6px;">
+          <p style="margin:0 0 8px; font-size:0.85rem;">Formula: <strong>Carbon Factor = Total Emission ÷ Total Quantity (in the unit you picked above)</strong><br>
+            <span style="color:#8a8368;">e.g. if a source says a petrol car emits 0.192 kg CO₂e per km, put 0.192 directly. Only needed if you have specific data.</span></p>
+          <div class="form-row">
+            <div class="form-group"><label>Total Emission (kg CO₂e)</label><input type="number" id="calcEmission" min="0" step="0.01" placeholder="e.g. 6 for 1kg chicken"></div>
+            <div class="form-group"><label>Total Quantity (in chosen unit)</label><input type="number" id="calcPrice" min="0.01" step="0.01" placeholder="e.g. 1"></div>
+          </div>
+          <button type="button" class="btn" style="padding:6px 14px;" onclick="computeFactorFromCalc()">Use this factor</button>
+          <p id="calcResult" style="margin:8px 0 0; font-size:0.85rem; color:#8a8368;"></p>
+        </div>
+        <button class="btn" style="margin-top:6px;" onclick="addCustomSubItem()">➕ Add Item</button>
+        <div id="customSubItemList" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>➕ Add a Transaction</h2>
+        <div class="type-toggle">
+          <button id="typeIncomeBtn" class="active-income" onclick="setEntryType('income')">Income</button>
+          <button id="typeExpenseBtn" onclick="setEntryType('expense')">Expense</button>
+        </div>
+        <div class="form">
+          <div class="form-row">
+            <div class="form-group"><label>Date</label><input type="date" id="entryDate"></div>
+            <div class="form-group" id="entryCatWrap">
+              <label id="entryCatLabel">Category</label>
+              <select id="entryCategory" onchange="updateSubItemSelect()"></select>
+            </div>
+            <div class="form-group"><label>Amount (₹)</label><input type="number" id="entryAmount" min="1" value="500"></div>
+          </div>
+          <div class="form-group hidden" id="entrySubItemWrap">
+            <label>What kind, exactly? <span style="font-weight:400; color:var(--muted, #8a8368);">(for a more accurate carbon estimate)</span></label>
+            <select id="entrySubItem" onchange="updateQuantityField()"></select>
+          </div>
+          <div class="form-group hidden" id="entryQuantityWrap">
+            <label id="entryQuantityLabel">Quantity</label>
+            <input type="number" id="entryQuantity" min="0" step="0.01" value="1" oninput="updateFactorPreview()">
+          </div>
+          <p class="sub-note" id="factorPreview" style="margin:2px 0 0;"></p>
+          <div class="form-group">
+            <label>Notes (optional)</label>
+            <input type="text" id="entryNotes" placeholder="Example: Salary, Ola ride, Zomato order">
+            <div id="categorySuggestWrap" style="display:none; margin-top:6px; font-size:0.85rem;"></div>
+          </div>
+          <button class="btn" onclick="addTransaction()">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📄 All Transactions</h2>
+        <div id="allTxnTableWrap"></div>
+      </div>
+    </section>
+
+    <!-- TAB: INSIGHTS -->
+    <section id="tab-insights" class="hidden">
+      <div class="card">
+        <h3>🌍 What Is Carbon Emission, and Why Keep It Low?</h3>
+        <p><strong>Carbon emission (carbon footprint)</strong> is the total amount of greenhouse gases — mainly CO₂ — released into the atmosphere because of an activity, product, or service. Almost everything we spend money on (travel, food, electricity, shopping) causes some emissions during its production, transport, or use.</p>
+        <p><strong>How this app calculates it:</strong></p>
+        <p class="num" style="background:#f4faf5; border:1px solid #cfe3d5; padding:8px 10px; border-radius:4px; display:inline-block;">Carbon (kg CO₂e) = Amount Spent (₹) × Carbon Factor of that Category</p>
+        <p>Every category has a <em>carbon factor</em> — an estimate of how many kg of CO₂e are emitted per ₹1 spent in it (e.g. transport & travel tend to be carbon-heavy, while bills or entertainment are usually lower). You can view and set this factor for any category you create yourself on the "Add Income / Expense" tab.</p>
+        <p><strong>Why it matters to keep it minimum:</strong></p>
+        <ul class="tip-list">
+          <li>Lower emissions mean a smaller personal contribution to climate change and global warming.</li>
+          <li>Cleaner air and better health outcomes, especially in crowded cities.</li>
+          <li>Low-carbon habits (walking/cycling, home-cooked meals, mindful electricity use) are usually cheaper too — so it helps your savings goal at the same time.</li>
+          <li>Small, consistent reductions add up to a large impact over a month and a year.</li>
+        </ul>
+        <p><strong>Why food isn't just "one number":</strong> different foods have very different footprints for the same money spent — mainly because of how they're farmed (methane from cattle/rice paddies, feed & land use, refrigeration & transport). That's why "Add a Transaction" now lets you pick what kind of food it was for a more accurate estimate. Rough real-world figures (kg CO₂e per kg of food, from published lifecycle studies):</p>
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem; margin:6px 0 4px;">
+          <tbody>
+            <tr><td style="padding:3px 6px;">🥬 Fruits & vegetables</td><td style="padding:3px 6px; text-align:right;">~0.4 kg</td></tr>
+            <tr><td style="padding:3px 6px;">🌾 Grains, rice & bread</td><td style="padding:3px 6px; text-align:right;">~1.5–2.7 kg</td></tr>
+            <tr><td style="padding:3px 6px;">🥛 Milk & dairy</td><td style="padding:3px 6px; text-align:right;">~3 kg</td></tr>
+            <tr><td style="padding:3px 6px;">🥚 Eggs & chicken</td><td style="padding:3px 6px; text-align:right;">~4.5–6 kg</td></tr>
+            <tr><td style="padding:3px 6px;">🐟 Fish & seafood</td><td style="padding:3px 6px; text-align:right;">~5–6 kg</td></tr>
+            <tr><td style="padding:3px 6px;">🥩 Red meat (mutton/beef)</td><td style="padding:3px 6px; text-align:right;">~25–27 kg</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.85rem; color:#8a8368; margin-top:2px;">These are per kilogram of food, for illustration — the app's own factors (per ₹1 spent) preserve this same ranking so your Food category reflects it.</p>
+      </div>
+
+      <div class="card">
+        <h3>🕒 Last 30 Days Snapshot</h3>
+        <p>Income (30 days): <strong class="num" id="snapIncome30">₹0</strong></p>
+        <p>Spend (30 days): <strong class="num" id="snapSpend30">₹0</strong></p>
+        <p>Carbon (30 days): <strong class="num" id="snapCarbon30">0 kg CO₂e</strong></p>
+
+        <h3 style="margin-top:14px;">🎯 Focus Areas</h3>
+        <p id="focusSpend">Highest spend category: —</p>
+        <p id="focusCarbon">Highest carbon category: —</p>
+      </div>
+
+      <div class="card">
+        <h3>💬 Eco-Finance Assistant <span id="bertStatusBadge" style="font-size:0.68rem; font-weight:400; color:#8a8368;">🧠 loading model…</span></h3>
+        <p class="chat-hint">Ask about eco-living, saving money, your own numbers ("how much did I spend this month"), or how a feature works ("how is eco score calculated").</p>
+        <div class="chat-window" id="chatWindow"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Type your question…" onkeydown="if(event.key==='Enter'){ event.preventDefault(); askChatbot(); }">
+          <button class="btn" onclick="askChatbot()">Send</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>✨ General Tips</h3>
+        <div>
+          <span class="badge">Transport</span>
+          <span class="badge">Food</span>
+          <span class="badge">Bills</span>
+          <span class="badge">Shopping</span>
+          <span class="badge">Investing</span>
+          <span class="badge">Debt</span>
+          <span class="badge">Water</span>
+          <span class="badge">Waste</span>
+          <span class="badge">Renewable Energy</span>
+        </div>
+        <ul class="tip-list">
+          <li>Replace some cab rides with walking, cycling, or public transport.</li>
+          <li>Fewer food delivery orders, more home-cooked meals.</li>
+          <li>Keep AC at 24–26°C, use LED bulbs, and turn devices off when not in use.</li>
+          <li>Delay non-essential purchases; buy durable items that last longer.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ================= Config ================= */
+const EXPENSE_CATEGORIES = ["Transport","Food","Shopping","Bills","Entertainment","Travel","Other"];
+const INCOME_SOURCES = ["Salary","Freelance","Business","Investment","Gift","Other"];
+const CARBON_FACTORS = {Transport:0.25, Food:0.12, Shopping:0.15, Bills:0.18, Entertainment:0.08, Travel:0.30, Other:0.10};
+
+// Item-level carbon factors, pre-calculated so most users never have to work
+// anything out themselves — just pick/type the item and its factor is
+// already known. Values are illustrative (kg CO₂e per ₹1 spent), ranked
+// using widely-cited relative footprints (Poore & Nemecek 2018; DEFRA; CEA
+// India for electricity/fuel). Anything typed that isn't in this list gets
+// auto-estimated by matching it to the closest known item (see "Auto-
+// Calculate" below) — so nothing here needs to stay static either.
+// 3-tier item database: Category -> Subcategory -> Items. Each item carries a
+// real emission factor. When `unit` is set (kg/km/litre/kWh/item), the factor
+// is "kg CO₂e per that unit" and the transaction form asks for a Quantity in
+// that unit — genuine physical emission accounting, not a money proxy. When
+// `unit` is null, there's no natural physical unit (rent, a subscription, a
+// misc purchase) so it falls back to "kg CO₂e per ₹1 spent" as before.
+// Figures are illustrative estimates from widely-cited sources (Poore &
+// Nemecek 2018 for food; DEFRA conversion factors for transport/energy; CEA
+// India for the electricity grid factor).
+const CATEGORY_SUBITEMS = {
+  Food: {
+    "Vegetables": [
+      { name:"Potato", unit:"kg", factor:0.29 },
+      { name:"Onion", unit:"kg", factor:0.29 },
+      { name:"Tomato", unit:"kg", factor:0.40 },
+      { name:"Broccoli / Leafy greens", unit:"kg", factor:0.40 }
+    ],
+    "Fruits": [
+      { name:"Apple", unit:"kg", factor:0.40 },
+      { name:"Banana", unit:"kg", factor:0.70 },
+      { name:"Mango", unit:"kg", factor:0.50 }
+    ],
+    "Dairy & Meat": [
+      { name:"Milk", unit:"liter", factor:3.2 },
+      { name:"Cheese / Paneer", unit:"kg", factor:21 },
+      { name:"Chicken", unit:"kg", factor:6 },
+      { name:"Mutton / Beef", unit:"kg", factor:27 },
+      { name:"Eggs", unit:"kg", factor:4.5 }
+    ],
+    "Packaged & Grocery": [
+      { name:"Rice", unit:"kg", factor:2.7 },
+      { name:"Wheat / Atta", unit:"kg", factor:1.4 },
+      { name:"Pulses & Lentils", unit:"kg", factor:0.9 },
+      { name:"Packaged Snacks", unit:null, factor:0.16 },
+      { name:"Restaurant Meal / Food Delivery", unit:null, factor:0.19 },
+      { name:"Tea, Coffee & Beverages", unit:null, factor:0.10 }
+    ]
+  },
+  Transport: {
+    "Personal Vehicle": [
+      { name:"Petrol Car", unit:"km", factor:0.192 },
+      { name:"Diesel Car", unit:"km", factor:0.171 },
+      { name:"CNG Car", unit:"km", factor:0.11 },
+      { name:"Bike / Scooter", unit:"km", factor:0.05 },
+      { name:"Electric Car / EV", unit:"km", factor:0.05 }
+    ],
+    "Public Transport": [
+      { name:"Bus", unit:"km", factor:0.089 },
+      { name:"Metro / Local Train", unit:"km", factor:0.04 },
+      { name:"Cab (Ola/Uber)", unit:"km", factor:0.18 },
+      { name:"Auto Rickshaw", unit:"km", factor:0.10 },
+      { name:"Flight (domestic)", unit:"km", factor:0.15 },
+      { name:"Flight (international)", unit:"km", factor:0.19 }
+    ]
+  },
+  Bills: {
+    "Household": [
+      { name:"Electricity", unit:"kWh", factor:0.71 },
+      { name:"Cooking Gas (LPG)", unit:"kg", factor:2.98 },
+      { name:"Water", unit:"liter", factor:0.0003 },
+      { name:"Mobile & Internet", unit:null, factor:0.05 },
+      { name:"Rent", unit:null, factor:0.02 }
+    ]
+  },
+  Shopping: {
+    "Lifestyle": [
+      { name:"Clothes & Fashion", unit:"item", factor:22 },
+      { name:"Electronics & Gadgets", unit:"item", factor:150 },
+      { name:"Furniture", unit:"item", factor:90 },
+      { name:"Cosmetics & Personal Care", unit:"item", factor:3 },
+      { name:"Books & Stationery", unit:null, factor:0.06 }
+    ]
+  },
+  Entertainment: {
+    "Leisure": [
+      { name:"Movies / Cinema", unit:null, factor:0.06 },
+      { name:"Streaming Subscription", unit:null, factor:0.03 },
+      { name:"Gaming", unit:null, factor:0.05 },
+      { name:"Concerts & Events", unit:null, factor:0.10 }
+    ]
+  },
+  Travel: {
+    "Trips": [
+      { name:"Hotel Stay (per night)", unit:"item", factor:20 },
+      { name:"Train Ticket (long distance)", unit:"km", factor:0.04 },
+      { name:"Flight Ticket", unit:"km", factor:0.15 },
+      { name:"Vacation Package", unit:null, factor:0.30 }
+    ]
+  },
+  Other: {
+    "Miscellaneous": [
+      { name:"Miscellaneous", unit:null, factor:0.10 }
+    ]
+  }
+};
+
+const UNIT_LABELS = { kg:"kg", km:"km", liter:"litres", kWh:"kWh (units)", item:"item(s)" };
+
+let currentUser = null;      // {id, name, email, role}
+let authToken = localStorage.getItem("eco_budget_token") || "";
+let txns = [];               // in-memory cache for current user
+let settings = {savingsTarget:5000, carbonTarget:300, goalStyle:"balanced"};
+let period = "month";
+let refDate = new Date();
+let entryType = "income";
+
+/* ---- Dynamic (user-added) categories ---- */
+// customCategories.expense = [{name, factor}], customCategories.income = [name, ...]
+let customCategories = {income:[], expense:[]};
+let catManageType = "expense";
+
+// customSubItems = {categoryName: {subcategoryName: [{name, unit, factor}]}}
+// — same 3-tier shape as CATEGORY_SUBITEMS, fully user-driven and not limited
+// to any built-in category or subcategory.
+let customSubItems = {};
+
+function allExpenseCategories(){
+  return [...EXPENSE_CATEGORIES, ...customCategories.expense.map(c=>c.name)];
+}
+function allIncomeSources(){
+  return [...INCOME_SOURCES, ...customCategories.income];
+}
+
+// Subcategory groups for a category, merging built-in + custom, as
+// {subcategoryName: [{name, unit, factor}, ...]}.
+function subcategoryGroupsForCategory(category){
+  const groups = {};
+  const builtin = CATEGORY_SUBITEMS[category] || {};
+  for(const sub in builtin) groups[sub] = [...builtin[sub]];
+  const custom = customSubItems[category] || {};
+  for(const sub in custom){
+    if(!groups[sub]) groups[sub] = [];
+    groups[sub] = [...groups[sub], ...custom[sub]];
+  }
+  return groups;
+}
+// Flat list of every item in a category (any subcategory), for lookups.
+function allSubItemsForCategory(category){
+  const groups = subcategoryGroupsForCategory(category);
+  return Object.values(groups).flat();
+}
+// Returns {factor, unit} for an item, or null if not found.
+function getItemDetails(category, subItemName){
+  if(!subItemName) return null;
+  const item = allSubItemsForCategory(category).find(i=>i.name===subItemName);
+  return item ? { factor:item.factor, unit:item.unit||null } : null;
+}
+function getCarbonFactor(category, subItemName){
+  const item = getItemDetails(category, subItemName);
+  if(item) return item.factor;
+  if(CARBON_FACTORS[category] !== undefined) return CARBON_FACTORS[category];
+  const custom = customCategories.expense.find(c=>c.name===category);
+  return custom ? custom.factor : CARBON_FACTORS.Other;
+}
+
+/* ================= Storage helpers ================= */
+/* Uses the browser's own localStorage so accounts & data are saved for real
+   on this device/browser — this is what fixes "register works but login
+   next time fails": the earlier version relied on window.storage, which
+   only exists inside Claude's own live-artifact preview. Outside that
+   preview (a normal saved/opened .html file) window.storage doesn't exist,
+   so every save was silently failing and registered accounts were never
+   actually stored. */
+async function getJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw !== null ? JSON.parse(raw) : fallback;
+  }catch(e){ return fallback; }
+}
+async function setJSON(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }
+  catch(e){ console.error("storage set failed", e); }
+}
+
+function txnKey(email){ return "txns:" + email; }
+function settingsKey(email){ return "settings:" + email; }
+function customCatKey(email){ return "customCats:" + email; }
+function subItemKey(email){ return "customSubItems:" + email; }
+
+/* ================= Auth ================= */
+function switchAuthTab(tab){
+  document.getElementById('loginTabBtn').classList.toggle('active', tab==='login');
+  document.getElementById('registerTabBtn').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab!=='register');
+  document.getElementById('loginErr').textContent='';
+  document.getElementById('regErr').textContent='';
+}
+
+async function handleRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+  const errEl = document.getElementById('regErr');
+  errEl.textContent='';
+  if(!name || !email || !password){ errEl.textContent='Please fill in all fields.'; return; }
+  if(password.length < 10 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)){
+    errEl.textContent='Use at least 10 characters, including at least one letter and one number.'; return;
+  }
+  const btn = document.querySelector('#registerForm .btn-primary');
+  btn.disabled = true; btn.textContent = 'Sending verification email…';
+  try {
+    const res = await fetch('/api/auth/register', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,password})});
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || 'Could not create account.');
+    errEl.style.color = 'var(--pine)';
+    errEl.textContent = data.message || 'Check your inbox and verify your email before logging in.';
+    document.getElementById('regPassword').value='';
+    document.getElementById('loginEmail').value=email;
+    switchAuthTab('login');
+    document.getElementById('loginErr').style.color = 'var(--pine)';
+    document.getElementById('loginErr').textContent = data.message || 'Verification email sent. Verify your email before logging in.';
+  } catch(e) { errEl.style.color = 'var(--coral)'; errEl.textContent = e.message || 'Network error. Is the ECO Budget server running?'; }
+  finally { btn.disabled = false; btn.textContent = 'Create account'; }
+}
+
+async function handleLogin(){
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.style.color = 'var(--coral)'; errEl.textContent='';
+  if(!email || !password){ errEl.textContent='Enter your email and password.'; return; }
+  const btn = document.querySelector('#loginForm .btn-primary');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res = await fetch('/api/auth/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password})});
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || 'Could not log in.');
+    authToken = data.token;
+    localStorage.setItem('eco_budget_token', authToken);
+    currentUser = data.user;
+    // Keep existing local ledger keys, scoped by this verified email.
+    if(await getJSON(settingsKey(email), null) === null) await setJSON(settingsKey(email), {savingsTarget:5000, carbonTarget:300, goalStyle:'balanced'});
+    if(await getJSON(txnKey(email), null) === null) await setJSON(txnKey(email), []);
+    if(await getJSON(customCatKey(email), null) === null) await setJSON(customCatKey(email), {income:[],expense:[]});
+    if(await getJSON(subItemKey(email), null) === null) await setJSON(subItemKey(email), {});
+    document.getElementById('loginPassword').value='';
+    await enterApp();
+  } catch(e) { errEl.textContent = e.message || 'Network error. Is the ECO Budget server running?'; }
+  finally { btn.disabled = false; btn.textContent = 'Log in'; }
+}
+
+function handleLogout(){
+  currentUser = null;
+  authToken = "";
+  localStorage.removeItem("eco_budget_token");
+  txns = [];
+  chatHistory = [];
+  document.getElementById('appScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPassword').value='';
+}
+
+async function enterApp(){
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+
+  const firstName = currentUser.name.split(' ')[0];
+  document.getElementById('greetHello').textContent = `Hello, ${firstName}! 👋`;
+  document.getElementById('greetSub').textContent = `Welcome back to your money & carbon ledger.`;
+
+  settings = await getJSON(settingsKey(currentUser.email), {savingsTarget:5000, carbonTarget:300, goalStyle:"balanced"});
+  document.getElementById('settingSavingsTarget').value = settings.savingsTarget;
+  document.getElementById('settingCarbonTarget').value = settings.carbonTarget;
+  document.getElementById('settingGoalStyle').value = settings.goalStyle;
+
+  txns = await getJSON(txnKey(currentUser.email), []);
+  customCategories = await getJSON(customCatKey(currentUser.email), {income:[], expense:[]});
+  if(!customCategories.income) customCategories.income = [];
+  if(!customCategories.expense) customCategories.expense = [];
+  customSubItems = await getJSON(subItemKey(currentUser.email), {});
+
+  document.getElementById('entryDate').value = todayStr();
+  setCatManageType('expense');
+  populateCategorySelect();
+  renderCustomCatList();
+  populateSubItemCategorySelect();
+  computeCategoryEmbeddings();
+  computeItemEmbeddings();
+  renderChatWindow();
+  refDate = new Date();
+  setPeriod('month');
+}
+
+/* ================= Settings ================= */
+async function saveSettings(){
+  settings.savingsTarget = Number(document.getElementById('settingSavingsTarget').value) || 0;
+  settings.carbonTarget = Number(document.getElementById('settingCarbonTarget').value) || 0;
+  settings.goalStyle = document.getElementById('settingGoalStyle').value;
+  await setJSON(settingsKey(currentUser.email), settings);
+  renderOverview();
+}
+
+async function clearAllData(){
+  if(!confirm('This will delete all your transactions. Continue?')) return;
+  txns = [];
+  await setJSON(txnKey(currentUser.email), txns);
+  renderAll();
+}
+
+/* ================= Tabs ================= */
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('tab-overview').classList.toggle('hidden', tab!=='overview');
+  document.getElementById('tab-add').classList.toggle('hidden', tab!=='add');
+  document.getElementById('tab-insights').classList.toggle('hidden', tab!=='insights');
+  if(tab==='overview') renderOverview();
+  if(tab==='add') renderAddTab();
+  if(tab==='insights') renderInsights();
+}
+
+/* ================= Period selector ================= */
+function setPeriod(p){
+  period = p;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('active', b.dataset.period===p));
+  renderAll();
+}
+function shiftPeriod(dir){
+  if(period==='day') refDate.setDate(refDate.getDate()+dir);
+  else if(period==='month') refDate.setMonth(refDate.getMonth()+dir);
+  else refDate.setFullYear(refDate.getFullYear()+dir);
+  renderAll();
+}
+function inCurrentPeriod(dateStr){
+  const d = new Date(dateStr+"T00:00:00");
+  if(period==='day'){
+    return sameDay(d, refDate);
+  } else if(period==='month'){
+    return d.getFullYear()===refDate.getFullYear() && d.getMonth()===refDate.getMonth();
+  } else {
+    return d.getFullYear()===refDate.getFullYear();
+  }
+}
+function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function periodLabel(){
+  if(period==='day') return refDate.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+  if(period==='month') return refDate.toLocaleDateString('en-IN', {month:'long', year:'numeric'});
+  return String(refDate.getFullYear());
+}
+function targetScale(){
+  if(period==='day') return 1/30;
+  if(period==='year') return 12;
+  return 1;
+}
+
+/* ================= Rendering ================= */
+function renderAll(){
+  document.getElementById('periodRange').textContent = periodLabel();
+  renderOverview();
+  renderAddTab();
+  renderInsights();
+}
+
+function periodTxns(){
+  return txns.filter(t => inCurrentPeriod(t.date));
+}
+
+function renderOverview(){
+  const list = periodTxns();
+  const income = list.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const carbon = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.carbon,0);
+  const savings = income - expense;
+
+  document.getElementById('kpiIncome').textContent = '₹' + Math.round(income).toLocaleString('en-IN');
+  document.getElementById('kpiExpense').textContent = '₹' + Math.round(expense).toLocaleString('en-IN');
+  document.getElementById('kpiExpenseSub').textContent = (income>0 ? (expense/income*100).toFixed(1) : '0.0') + '% of income';
+  document.getElementById('kpiSavings').textContent = '₹' + Math.round(savings).toLocaleString('en-IN');
+  document.getElementById('kpiSavingsSub').textContent = (income>0 ? (savings/income*100).toFixed(1) : '0.0') + '% saved';
+  document.getElementById('kpiCarbon').textContent = carbon.toFixed(1) + ' kg CO₂e';
+
+  const scaledCarbonTarget = settings.carbonTarget * targetScale();
+  const carbonPct = scaledCarbonTarget>0 ? (carbon/scaledCarbonTarget*100) : 0;
+  document.getElementById('kpiCarbonSub').textContent = carbonPct.toFixed(1) + '% of target';
+
+  const scaledSavingsTarget = settings.savingsTarget * targetScale();
+  const savingsPct = scaledSavingsTarget>0 ? Math.max(0, savings/scaledSavingsTarget*100) : (savings>=0?100:0);
+
+  document.getElementById('savingsRingWrap').innerHTML = ringSVG(Math.min(100,savingsPct), '#c79a3d', 'Savings Goal');
+  document.getElementById('carbonRingWrap').innerHTML = ringSVG(Math.min(100,100-Math.min(100,carbonPct)), '#4f8b63', 'Carbon Headroom');
+
+  // eco score
+  const moneyScore = Math.max(0, 100 - (income>0 ? expense/income*100 : 0));
+  const carbonScore = Math.max(0, 100 - carbonPct);
+  let ecoScore;
+  if(settings.goalStyle==='money') ecoScore = moneyScore*0.7 + carbonScore*0.3;
+  else if(settings.goalStyle==='eco') ecoScore = moneyScore*0.3 + carbonScore*0.7;
+  else ecoScore = moneyScore*0.5 + carbonScore*0.5;
+  ecoScore = Math.max(0, Math.min(100, ecoScore));
+  document.getElementById('ecoScore').textContent = Math.round(ecoScore) + ' / 100';
+  const scoreTextEl = document.getElementById('ecoScoreText');
+  if(ecoScore>=80){ scoreTextEl.textContent='🔥 Great job! Doing very well on budget and eco-goals.'; scoreTextEl.style.color='#2c5940'; }
+  else if(ecoScore>=50){ scoreTextEl.textContent='🙂 Not bad — a few tweaks could boost your score.'; scoreTextEl.style.color='#c79a3d'; }
+  else { scoreTextEl.textContent='⚠ Spend or carbon usage is high — check the Assistant for ideas.'; scoreTextEl.style.color='#c2542f'; }
+
+  // stars reward based on savings goal achievement
+  const starCount = Math.max(0, Math.min(5, Math.round(savingsPct/20)));
+  let starsHtml='';
+  for(let i=0;i<5;i++){ starsHtml += `<span class="${i<starCount?'star-on':'star-off'}">★</span>`; }
+  document.getElementById('starsRow').innerHTML = starsHtml;
+  const starsMsgEl = document.getElementById('starsMsg');
+  if(scaledSavingsTarget<=0){
+    starsMsgEl.textContent = 'Set a savings target in the sidebar to start earning stars.';
+  } else if(starCount>=5){
+    starsMsgEl.textContent = `🌟 5-star reward! You hit your savings goal for this ${period}.`;
+  } else {
+    starsMsgEl.textContent = `You're at ${savingsPct.toFixed(0)}% of your ${period}ly savings goal.`;
+  }
+
+  // transactions table
+  const sorted = [...list].sort((a,b)=> b.date.localeCompare(a.date));
+  if(sorted.length===0){
+    document.getElementById('txnTableWrap').innerHTML = '<p class="empty-note">No transactions in this period yet.</p>';
+  } else {
+    let rows = sorted.map(t => `<tr>
+        <td>${t.date}</td>
+        <td>${t.type==='income'?'Income':'Expense'}</td>
+        <td>${t.category}${t.subItem ? ' <span style="color:#8a8368; font-size:0.85em;">— '+t.subItem+(t.quantity!=null&&t.unit ? ' ('+t.quantity+' '+(UNIT_LABELS[t.unit]||t.unit)+')' : '')+'</span>' : ''}</td>
+        <td class="${t.type==='income'?'amt-income':'amt-expense'}">${t.type==='income'?'+':'-'}₹${t.amount.toLocaleString('en-IN')}</td>
+        <td>${t.type==='expense'? t.carbon.toFixed(1) : '—'}</td>
+        <td>${t.notes||''}</td>
+      </tr>`).join('');
+    document.getElementById('txnTableWrap').innerHTML = `<table><thead><tr>
+        <th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Carbon</th><th>Notes</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  // category breakdown (expenses only)
+  const cats = {};
+  list.filter(t=>t.type==='expense').forEach(t=>{
+    if(!cats[t.category]) cats[t.category]={spend:0, carbon:0};
+    cats[t.category].spend += t.amount;
+    cats[t.category].carbon += t.carbon;
+  });
+  const catKeys = Object.keys(cats);
+  if(catKeys.length===0){
+    document.getElementById('categoryTableWrap').innerHTML = '<p class="empty-note">No expenses in this period yet.</p>';
+  } else {
+    let rows = catKeys.sort((a,b)=>cats[b].spend-cats[a].spend).map(c => `<tr>
+        <td>${c}</td><td>₹${cats[c].spend.toLocaleString('en-IN')}</td><td>${cats[c].carbon.toFixed(1)}</td>
+      </tr>`).join('');
+    document.getElementById('categoryTableWrap').innerHTML = `<table><thead><tr>
+        <th>Category</th><th>Total Spend (₹)</th><th>Total Carbon (kg CO₂e)</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+}
+
+function ringSVG(pct, color, label){
+  const r=44, c=2*Math.PI*r;
+  const offset = c - (Math.max(0,Math.min(100,pct))/100)*c;
+  return `<svg width="110" height="110" viewBox="0 0 110 110">
+      <circle cx="55" cy="55" r="${r}" fill="none" stroke="#e9e6d8" stroke-width="10"/>
+      <circle cx="55" cy="55" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+        stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
+        transform="rotate(-90 55 55)"/>
+      <text x="55" y="60" text-anchor="middle" class="ring-pct">${Math.round(pct)}%</text>
+    </svg><div class="ring-label">${label}</div>`;
+}
+
+function populateCategorySelect(){
+  const sel = document.getElementById('entryCategory');
+  const list = entryType==='income' ? allIncomeSources() : allExpenseCategories();
+  sel.innerHTML = list.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('entryCatLabel').textContent = entryType==='income' ? 'Source' : 'Category';
+  updateSubItemSelect();
+}
+
+function updateSubItemSelect(){
+  const wrap = document.getElementById('entrySubItemWrap');
+  const sel = document.getElementById('entrySubItem');
+  const category = document.getElementById('entryCategory').value;
+  const groups = entryType==='expense' ? subcategoryGroupsForCategory(category) : {};
+  const subNames = Object.keys(groups);
+  if(subNames.length){
+    sel.innerHTML = subNames.map(sub =>
+      `<optgroup label="${sub}">` +
+        groups[sub].map(i=>`<option value="${i.name}">${i.name}${i.unit ? ' ('+UNIT_LABELS[i.unit]+')' : ''}</option>`).join('') +
+      `</optgroup>`
+    ).join('');
+    wrap.classList.remove('hidden');
+  } else {
+    sel.innerHTML = '';
+    wrap.classList.add('hidden');
+  }
+  updateQuantityField();
+}
+
+function updateQuantityField(){
+  const subWrap = document.getElementById('entrySubItemWrap');
+  const qWrap = document.getElementById('entryQuantityWrap');
+  const qLabel = document.getElementById('entryQuantityLabel');
+  const category = document.getElementById('entryCategory').value;
+  const subItem = !subWrap.classList.contains('hidden') ? document.getElementById('entrySubItem').value : null;
+  const item = getItemDetails(category, subItem);
+  if(item && item.unit){
+    qLabel.textContent = `Quantity (${UNIT_LABELS[item.unit]})`;
+    qWrap.classList.remove('hidden');
+  } else {
+    qWrap.classList.add('hidden');
+  }
+  updateFactorPreview();
+}
+
+function updateFactorPreview(){
+  const preview = document.getElementById('factorPreview');
+  if(!preview) return;
+  if(entryType!=='expense'){ preview.textContent = ''; return; }
+  const category = document.getElementById('entryCategory').value;
+  const subWrap = document.getElementById('entrySubItemWrap');
+  const subItem = !subWrap.classList.contains('hidden') ? document.getElementById('entrySubItem').value : null;
+  const item = getItemDetails(category, subItem);
+  if(item && item.unit){
+    const qty = Number(document.getElementById('entryQuantity').value) || 0;
+    const total = Math.round(qty * item.factor * 100) / 100;
+    preview.textContent = `${qty || '…'} ${UNIT_LABELS[item.unit]} × ${item.factor} kg CO₂e/${UNIT_LABELS[item.unit]} = ${total} kg CO₂e`;
+  } else {
+    const factor = getCarbonFactor(category, subItem);
+    preview.textContent = `Estimated carbon factor: ${factor} kg CO₂e per ₹1 spent` + (subItem ? ` (${subItem})` : ` (${category} average)`);
+  }
+}
+
+/* ---- Manage (add/remove) custom categories ---- */
+function setCatManageType(t){
+  catManageType = t;
+  document.getElementById('catTypeIncomeBtn').classList.toggle('active-income', t==='income');
+  document.getElementById('catTypeExpenseBtn').classList.toggle('active-expense', t==='expense');
+  document.getElementById('newCatFactorWrap').classList.toggle('hidden', t==='income');
+}
+
+async function addCustomCategory(){
+  const nameInput = document.getElementById('newCatName');
+  const name = nameInput.value.trim();
+  if(!name){ alert('Please enter a category / source name.'); return; }
+
+  if(catManageType==='expense'){
+    if(allExpenseCategories().some(c=>c.toLowerCase()===name.toLowerCase())){
+      alert('This expense category already exists.'); return;
+    }
+    let factor = Number(document.getElementById('newCatFactor').value);
+    if(isNaN(factor) || factor<0) factor = CARBON_FACTORS.Other;
+    customCategories.expense.push({name, factor});
+  } else {
+    if(allIncomeSources().some(c=>c.toLowerCase()===name.toLowerCase())){
+      alert('This income source already exists.'); return;
+    }
+    customCategories.income.push(name);
+  }
+
+  await setJSON(customCatKey(currentUser.email), customCategories);
+  nameInput.value = '';
+  populateCategorySelect();
+  renderCustomCatList();
+  populateSubItemCategorySelect();
+  computeCategoryEmbeddings();
+  computeItemEmbeddings();
+}
+
+async function removeCustomCategory(type, name){
+  if(type==='expense') customCategories.expense = customCategories.expense.filter(c=>c.name!==name);
+  else customCategories.income = customCategories.income.filter(c=>c!==name);
+  await setJSON(customCatKey(currentUser.email), customCategories);
+  populateCategorySelect();
+  renderCustomCatList();
+  populateSubItemCategorySelect();
+  computeCategoryEmbeddings();
+  computeItemEmbeddings();
+}
+
+function renderCustomCatList(){
+  const wrap = document.getElementById('customCatList');
+  if(!wrap) return;
+  let html = '';
+  if(customCategories.expense.length){
+    html += '<h3 style="margin-top:10px;">Your Expense Categories</h3><div>' +
+      customCategories.expense.map(c =>
+        `<span class="badge">${c.name} · ${c.factor} kg CO₂e/₹1
+          <button class="del-btn" style="margin-left:4px;" onclick="removeCustomCategory('expense','${c.name}')">✕</button>
+        </span>`).join('') + '</div>';
+  }
+  if(customCategories.income.length){
+    html += '<h3 style="margin-top:10px;">Your Income Sources</h3><div>' +
+      customCategories.income.map(c =>
+        `<span class="badge">${c}
+          <button class="del-btn" style="margin-left:4px;" onclick="removeCustomCategory('income','${c}')">✕</button>
+        </span>`).join('') + '</div>';
+  }
+  if(!html) html = '<p class="empty-note">No custom categories added yet — the ones above are the built-in defaults.</p>';
+  wrap.innerHTML = html;
+}
+
+/* ---- Manage (add/remove) dynamic items within a category ---- */
+function toggleFactorCalc(){
+  document.getElementById('factorCalcWrap').classList.toggle('hidden');
+}
+function computeFactorFromCalc(){
+  const emission = Number(document.getElementById('calcEmission').value);
+  const price = Number(document.getElementById('calcPrice').value);
+  const resultEl = document.getElementById('calcResult');
+  if(!emission || !price || price<=0){
+    resultEl.textContent = 'Enter both an emission value and a price greater than 0.';
+    return;
+  }
+  const factor = Math.round((emission/price)*10000)/10000;
+  document.getElementById('newSubItemFactor').value = factor;
+  resultEl.textContent = `Factor = ${emission} ÷ ${price} = ${factor} kg CO₂e per ₹1 — filled in above. Click "Add Item" to save it.`;
+}
+function populateSubItemCategorySelect(){
+  const sel = document.getElementById('subItemCategorySelect');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = allExpenseCategories().map(c=>`<option value="${c}">${c}</option>`).join('');
+  if(current && allExpenseCategories().includes(current)) sel.value = current;
+  renderSubItemList();
+  populateSubItemGroupSelect();
+}
+
+// Subcategory dropdown — same style as the Category dropdown: lists every
+// existing subcategory for the chosen category (built-in + custom), plus a
+// "+ Add new subcategory" option that reveals a text box for typing a fresh one.
+function populateSubItemGroupSelect(){
+  const catSel = document.getElementById('subItemCategorySelect');
+  const groupSel = document.getElementById('newSubItemGroupSelect');
+  if(!catSel || !groupSel) return;
+  const category = catSel.value;
+  const groups = Object.keys(subcategoryGroupsForCategory(category));
+  groupSel.innerHTML = groups.map(g=>`<option value="${g}">${g}</option>`).join('')
+    + `<option value="__new__">➕ Add new subcategory…</option>`;
+  handleGroupSelectChange();
+}
+function handleGroupSelectChange(){
+  const groupSel = document.getElementById('newSubItemGroupSelect');
+  const newInput = document.getElementById('newSubItemGroupNew');
+  const isNew = groupSel.value === '__new__';
+  newInput.classList.toggle('hidden', !isNew);
+  if(isNew) newInput.focus();
+}
+function getSelectedGroupName(){
+  const groupSel = document.getElementById('newSubItemGroupSelect');
+  if(groupSel.value === '__new__'){
+    return document.getElementById('newSubItemGroupNew').value.trim();
+  }
+  return groupSel.value;
+}
+
+async function addCustomSubItem(){
+  const category = document.getElementById('subItemCategorySelect').value;
+  const group = getSelectedGroupName() || 'Other Items';
+  const nameInput = document.getElementById('newSubItemName');
+  const name = nameInput.value.trim();
+  const unit = document.getElementById('newSubItemUnit').value || null;
+  if(!category){ alert('Please add an expense category first.'); return; }
+  if(!name){ alert('Please enter an item name.'); return; }
+  if(allSubItemsForCategory(category).some(i=>i.name.toLowerCase()===name.toLowerCase())){
+    alert('This item already exists in this category.'); return;
+  }
+  let factor = Number(document.getElementById('newSubItemFactor').value);
+  if(isNaN(factor) || factor<0) factor = getCarbonFactor(category);
+
+  if(!customSubItems[category]) customSubItems[category] = {};
+  if(!customSubItems[category][group]) customSubItems[category][group] = [];
+  customSubItems[category][group].push({name, unit, factor});
+  await setJSON(subItemKey(currentUser.email), customSubItems);
+  nameInput.value = '';
+  document.getElementById('newSubItemGroupNew').value = '';
+  document.getElementById('autoCalcResult').textContent = '';
+  renderSubItemList();
+  populateSubItemGroupSelect();
+  computeItemEmbeddings();
+  if(document.getElementById('entryCategory').value===category) updateSubItemSelect();
+}
+
+async function removeCustomSubItem(category, group, name){
+  if(!customSubItems[category] || !customSubItems[category][group]) return;
+  customSubItems[category][group] = customSubItems[category][group].filter(i=>i.name!==name);
+  if(customSubItems[category][group].length===0) delete customSubItems[category][group];
+  await setJSON(subItemKey(currentUser.email), customSubItems);
+  renderSubItemList();
+  populateSubItemGroupSelect();
+  computeItemEmbeddings();
+  if(document.getElementById('entryCategory').value===category) updateSubItemSelect();
+}
+
+function renderSubItemList(){
+  const wrap = document.getElementById('customSubItemList');
+  const sel = document.getElementById('subItemCategorySelect');
+  if(!wrap || !sel || !sel.value) { if(wrap) wrap.innerHTML=''; return; }
+  const category = sel.value;
+  const badge = i => `${i.name} · ${i.factor} kg CO₂e${i.unit ? '/'+(UNIT_LABELS[i.unit]||i.unit) : '/₹1'}`;
+  const defaults = CATEGORY_SUBITEMS[category] || {};
+  const custom = customSubItems[category] || {};
+  let html = '';
+  for(const group in defaults){
+    html += `<h3 style="margin-top:10px;">${category} → ${group} — built-in</h3><div>` +
+      defaults[group].map(i => `<span class="badge">${badge(i)}</span>`).join('') + '</div>';
+  }
+  for(const group in custom){
+    if(!custom[group].length) continue;
+    html += `<h3 style="margin-top:10px;">${category} → ${group} — your items</h3><div>` +
+      custom[group].map(i => `<span class="badge">${badge(i)}
+        <button class="del-btn" style="margin-left:4px;" onclick="removeCustomSubItem('${category}','${group}','${i.name}')">✕</button>
+      </span>`).join('') + '</div>';
+  }
+  if(!html) html = `<p class="empty-note">No items yet for ${category} — add one above (e.g. Subcategory "Vegetables", Item "Potato").</p>`;
+  wrap.innerHTML = html;
+}
+function setEntryType(t){
+  entryType = t;
+  document.getElementById('typeIncomeBtn').classList.toggle('active-income', t==='income');
+  document.getElementById('typeExpenseBtn').classList.toggle('active-expense', t==='expense');
+  populateCategorySelect();
+  const suggWrap = document.getElementById('categorySuggestWrap');
+  if(suggWrap) suggWrap.style.display='none';
+}
+
+function renderAddTab(){
+  const sorted = [...txns].sort((a,b)=> b.date.localeCompare(a.date));
+  if(sorted.length===0){
+    document.getElementById('allTxnTableWrap').innerHTML = '<p class="empty-note">No transactions added yet.</p>';
+    return;
+  }
+  let rows = sorted.map(t => `<tr>
+      <td>${t.date}</td>
+      <td>${t.type==='income'?'Income':'Expense'}</td>
+      <td>${t.category}${t.subItem ? ' <span style="color:#8a8368; font-size:0.85em;">— '+t.subItem+(t.quantity!=null&&t.unit ? ' ('+t.quantity+' '+(UNIT_LABELS[t.unit]||t.unit)+')' : '')+'</span>' : ''}</td>
+      <td class="${t.type==='income'?'amt-income':'amt-expense'}">${t.type==='income'?'+':'-'}₹${t.amount.toLocaleString('en-IN')}</td>
+      <td>${t.type==='expense'? t.carbon.toFixed(1) : '—'}</td>
+      <td>${t.notes||''}</td>
+      <td><button class="del-btn" onclick="deleteTxn('${t.id}')">✕</button></td>
+    </tr>`).join('');
+  document.getElementById('allTxnTableWrap').innerHTML = `<table><thead><tr>
+      <th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Carbon</th><th>Notes</th><th></th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+async function addTransaction(){
+  const date = document.getElementById('entryDate').value || todayStr();
+  const category = document.getElementById('entryCategory').value;
+  const amount = Number(document.getElementById('entryAmount').value);
+  const notes = document.getElementById('entryNotes').value.trim();
+  const subWrap = document.getElementById('entrySubItemWrap');
+  const subItem = (entryType==='expense' && !subWrap.classList.contains('hidden'))
+    ? document.getElementById('entrySubItem').value : null;
+  if(!amount || amount<=0){ alert('Please enter a valid amount.'); return; }
+
+  const item = entryType==='expense' ? getItemDetails(category, subItem) : null;
+  const qtyWrap = document.getElementById('entryQuantityWrap');
+  let carbon = 0, quantity = null, unit = null;
+  if(entryType==='expense'){
+    if(item && item.unit && !qtyWrap.classList.contains('hidden')){
+      quantity = Number(document.getElementById('entryQuantity').value) || 0;
+      unit = item.unit;
+      carbon = Math.round(quantity * item.factor * 100) / 100;
+    } else {
+      carbon = Math.round(amount * getCarbonFactor(category, subItem) * 100) / 100;
+    }
+  }
+  const txn = {id: Date.now()+'_'+Math.random().toString(36).slice(2,7), type:entryType, date, category, subItem, quantity, unit, amount, carbon, notes};
+  txns.push(txn);
+  await setJSON(txnKey(currentUser.email), txns);
+  document.getElementById('entryAmount').value = entryType==='income' ? '' : '500';
+  document.getElementById('entryNotes').value='';
+  updateFactorPreview();
+  renderAll();
+}
+
+async function deleteTxn(id){
+  txns = txns.filter(t=>t.id!==id);
+  await setJSON(txnKey(currentUser.email), txns);
+  renderAll();
+}
+
+function renderInsights(){
+  const maxDate = txns.length ? txns.reduce((m,t)=> t.date>m?t.date:m, txns[0].date) : todayStr();
+  const cutoff = new Date(maxDate+"T00:00:00"); cutoff.setDate(cutoff.getDate()-30);
+  const last30 = txns.filter(t => new Date(t.date+"T00:00:00") >= cutoff);
+
+  const inc30 = last30.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const exp30 = last30.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const carb30 = last30.filter(t=>t.type==='expense').reduce((s,t)=>s+t.carbon,0);
+  document.getElementById('snapIncome30').textContent = '₹'+Math.round(inc30).toLocaleString('en-IN');
+  document.getElementById('snapSpend30').textContent = '₹'+Math.round(exp30).toLocaleString('en-IN');
+  document.getElementById('snapCarbon30').textContent = carb30.toFixed(1)+' kg CO₂e';
+
+  const cats={};
+  txns.filter(t=>t.type==='expense').forEach(t=>{
+    if(!cats[t.category]) cats[t.category]={spend:0,carbon:0};
+    cats[t.category].spend+=t.amount; cats[t.category].carbon+=t.carbon;
+  });
+  const keys=Object.keys(cats);
+  if(keys.length===0){
+    document.getElementById('focusSpend').textContent='Highest spend category: —';
+    document.getElementById('focusCarbon').textContent='Highest carbon category: —';
+  } else {
+    const topSpend = keys.reduce((a,b)=> cats[a].spend>=cats[b].spend?a:b);
+    const topCarbon = keys.reduce((a,b)=> cats[a].carbon>=cats[b].carbon?a:b);
+    document.getElementById('focusSpend').innerHTML = `Highest spend category: <strong>${topSpend}</strong> (₹${cats[topSpend].spend.toLocaleString('en-IN')})`;
+    document.getElementById('focusCarbon').innerHTML = `Highest carbon category: <strong>${topCarbon}</strong> (${cats[topCarbon].carbon.toFixed(1)} kg CO₂e)`;
+  }
+}
+
+/* ================= BERT semantic matching (in-browser) ================= */
+// Reference example sentences per chatbot topic. We embed these once, average
+// them into one "topic vector", then compare the user's question against each
+// topic vector with cosine similarity — this is what lets the assistant
+// understand rephrased questions instead of only exact keyword hits.
+const CHAT_TOPICS = [
+  { key:'transport', examples:[
+      "How can I reduce my transport or travel cost and carbon",
+      "cab uber ola bike bus car fuel commuting expenses are too high",
+      "my daily travel to work costs a lot"
+    ], reply: "Transport & travel usually create a lot of carbon.\n\n- Use public transport when possible (bus/metro)\n- Combine multiple small trips into one\n- Walk or cycle for short distances\n- Share rides with friends instead of going alone" },
+  { key:'food', examples:[
+      "I spend too much on food delivery and eating out",
+      "zomato swiggy restaurant meal orders are costly",
+      "how to reduce food expenses"
+    ], reply: "Food impact can be reduced by:\n\n- Fewer online orders, more home-cooked meals\n- Choosing more plant-based meals\n- Avoiding food waste by planning portions\n- Buying local and seasonal items when possible" },
+  { key:'bills', examples:[
+      "my electricity and power bills are very high",
+      "how to reduce ac fan light usage and current bill",
+      "utility bills are costing too much"
+    ], reply: "To lower electricity bills and carbon:\n\n- Set AC to 24–26°C instead of very low\n- Turn off lights and fans when leaving the room\n- Use LED bulbs and efficient appliances\n- Unplug chargers and devices when not in use" },
+  { key:'shopping', examples:[
+      "I buy too many clothes and things online",
+      "amazon flipkart shopping expenses are high",
+      "how to control impulse online shopping"
+    ], reply: "Shopping generates carbon from manufacturing and shipping:\n\n- Buy only what you really need\n- Choose better quality items that last longer\n- Avoid fast fashion where possible\n- Wait 1–2 days before buying non-essential items" },
+  { key:'savings', examples:[
+      "how can I save more money and grow my savings",
+      "my budget and income planning needs improvement",
+      "I want to spend less and save more"
+    ], reply: "To grow savings and cut carbon together:\n\n- Track where most of your money goes\n- Cut 10–20% from the least important category\n- Reduce high-cost, high-carbon habits like cabs and eating out\n- Set a monthly savings target and check it weekly" },
+  { key:'carbon', examples:[
+      "how do I lower my overall carbon footprint",
+      "what can I do about pollution and co2 emissions from my spending",
+      "I want to live a more eco friendly lifestyle"
+    ], reply: "To reduce your overall carbon footprint:\n\n- Focus on transport, home energy, and food\n- Drive/fly less, use public transport more\n- Use electricity carefully (AC, lights, appliances)\n- Eat more plant-based meals and avoid waste" },
+  { key:'investment', examples:[
+      "how should I invest my savings",
+      "where to invest money for good returns",
+      "investment options for beginners"
+    ], reply: "I'm not a financial advisor, so treat this as general information, not personal advice:\n\n- Build an emergency fund (3–6 months of expenses) before investing\n- Common beginner options: fixed deposits, PPF, index/mutual funds via SIP\n- Diversify instead of putting everything in one place\n- For anything specific to your situation, talk to a certified financial advisor" },
+  { key:'debt', examples:[
+      "I have too much debt or loan emi",
+      "how to pay off credit card debt",
+      "emi is taking a lot of my income"
+    ], reply: "General ways people manage debt (not personal advice):\n\n- List all debts with interest rates; pay off the highest-interest one first\n- Avoid taking new debt for non-essential spending\n- Where possible, consolidate into one lower-interest loan\n- If it feels unmanageable, a bank or certified credit counsellor can advise on your specific case" },
+  { key:'water', examples:[
+      "how to save water at home",
+      "water conservation tips",
+      "reduce water usage"
+    ], reply: "Simple ways to save water (and often money):\n\n- Fix leaking taps and pipes quickly\n- Use a bucket instead of a running shower where possible\n- Reuse RO/AC waste water for plants or cleaning\n- Turn off the tap while brushing or soaping" },
+  { key:'waste', examples:[
+      "how to reduce waste and recycle better",
+      "garbage and plastic waste at home",
+      "how to recycle properly"
+    ], reply: "Cutting household waste:\n\n- Separate wet and dry waste for proper recycling\n- Avoid single-use plastic bags and bottles\n- Compost kitchen waste if you have space\n- Repair or donate items instead of throwing them away" },
+  { key:'renewable', examples:[
+      "should I install solar panels",
+      "renewable energy at home",
+      "solar power for my house"
+    ], reply: "On renewable energy at home:\n\n- Rooftop solar can lower electricity bills long-term, though upfront cost is high\n- Check for local/state subsidy schemes before installing\n- Even without solar, LED lighting and efficient appliances cut a lot of grid demand\n- A local certified installer can give an accurate cost-payback estimate for your home" }
+];
+
+// Reference phrases per expense category, used the same way to auto-suggest a
+// category from whatever the user types in the transaction Notes field.
+const EXPENSE_CATEGORY_EXAMPLES = {
+  Transport: ["ola cab ride","uber trip","bus ticket fare","petrol diesel fuel","auto rickshaw","metro ticket"],
+  Food: ["zomato order","swiggy delivery","restaurant dinner","grocery shopping","coffee cafe snack"],
+  Shopping: ["amazon purchase","flipkart order","new clothes shirt shoes","online shopping"],
+  Bills: ["electricity bill","mobile recharge","wifi internet bill","water bill","rent payment"],
+  Entertainment: ["movie ticket","netflix subscription","concert show","gaming purchase"],
+  Travel: ["flight ticket","train booking","hotel stay","vacation trip"],
+  Other: ["miscellaneous expense","other purchase"]
+};
+
+let bertStatus = 'loading';      // 'loading' | 'ready' | 'unavailable'
+let topicEmbeddings = null;      // {topicKey: vector}
+let categoryEmbeddings = null;   // {categoryName: vector}
+
+function averageVectors(vecs){
+  const len = vecs[0].length;
+  const avg = new Array(len).fill(0);
+  vecs.forEach(v => { for(let i=0;i<len;i++) avg[i]+=v[i]; });
+  for(let i=0;i<len;i++) avg[i]/=vecs.length;
+  return avg;
+}
+function cosineSim(a,b){
+  let dot=0,na=0,nb=0;
+  for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; }
+  return dot/((Math.sqrt(na)*Math.sqrt(nb)) || 1);
+}
+function updateBertStatus(status){
+  bertStatus = status;
+  const el = document.getElementById('bertStatusBadge');
+  if(!el) return;
+  if(status==='loading') el.textContent = '🧠 loading model…';
+  else if(status==='ready') el.textContent = '🧠 smart matching ready ✅';
+  else el.textContent = '🧠 model unavailable — using keyword mode';
+}
+
+async function computeCategoryEmbeddings(){
+  if(bertStatus!=='ready' || typeof window.__bertEmbed !== 'function') return;
+  const fresh = {};
+  for(const cat of allExpenseCategories()){
+    const examples = EXPENSE_CATEGORY_EXAMPLES[cat] || [cat];
+    const vecs = await Promise.all(examples.map(e => window.__bertEmbed(e)));
+    fresh[cat] = averageVectors(vecs);
+  }
+  categoryEmbeddings = fresh;
+}
+
+// Flat list of every known item (built-in + everyone's own custom ones for
+// this account) with its category, so a brand-new typed item can be matched
+// against ALL of them, not just the ones in its own category — someone might
+// not even pick the "right" category first.
+function allKnownItemsFlat(){
+  const flat = [];
+  for(const cat of allExpenseCategories()){
+    const groups = subcategoryGroupsForCategory(cat);
+    for(const group in groups){
+      for(const item of groups[group]){
+        flat.push({ name:item.name, category:cat, group, unit:item.unit||null, factor:item.factor });
+      }
+    }
+  }
+  return flat;
+}
+
+let itemEmbeddings = null; // [{name, category, group, unit, factor, vec}]
+async function computeItemEmbeddings(){
+  if(bertStatus!=='ready' || typeof window.__bertEmbed !== 'function') return;
+  const flat = allKnownItemsFlat();
+  const withVecs = [];
+  for(const it of flat){
+    const vec = await window.__bertEmbed(`${it.name} (${it.group}, ${it.category})`);
+    withVecs.push({ ...it, vec });
+  }
+  itemEmbeddings = withVecs;
+}
+
+// The core "app calculates it, not the user" feature: given whatever name
+// someone typed, find the closest already-known item and copy its factor,
+// unit AND subcategory. Falls back to plain word overlap if BERT isn't
+// loaded, and finally to the category's own ₹-based average if nothing
+// matches at all — so it never leaves the field empty.
+async function autoCalculateItemFactor(){
+  const nameInput = document.getElementById('newSubItemName');
+  const category = document.getElementById('subItemCategorySelect').value;
+  const name = nameInput.value.trim();
+  const resultEl = document.getElementById('autoCalcResult');
+  if(!name){ resultEl.textContent = 'Type an item name first (e.g. "Potato", "Diesel Car").'; return; }
+  resultEl.textContent = 'Working it out…';
+
+  let best = null, bestScore = -1;
+  if(bertStatus==='ready' && itemEmbeddings && itemEmbeddings.length){
+    try{
+      const vec = await window.__bertEmbed(name + (category ? ' (' + category + ')' : ''));
+      for(const it of itemEmbeddings){
+        const score = cosineSim(vec, it.vec);
+        if(score > bestScore){ bestScore = score; best = it; }
+      }
+    }catch(e){ /* fall through to keyword fallback below */ }
+  }
+  if(!best || bestScore < 0.45){
+    // Keyword fallback: any known item whose name shares a word with what was typed.
+    const words = name.toLowerCase().split(/\s+/).filter(w=>w.length>2);
+    let kwMatch = null;
+    for(const it of allKnownItemsFlat()){
+      const itWords = it.name.toLowerCase();
+      if(words.some(w => wordInText(itWords, w))){ kwMatch = it; break; }
+    }
+    if(kwMatch){ best = kwMatch; bestScore = 0.5; }
+  }
+
+  const factorField = document.getElementById('newSubItemFactor');
+  const groupSel = document.getElementById('newSubItemGroupSelect');
+  const unitField = document.getElementById('newSubItemUnit');
+  if(best && bestScore >= 0.30){
+    factorField.value = best.factor;
+    unitField.value = best.unit || '';
+    if([...groupSel.options].some(o=>o.value===best.group)){
+      groupSel.value = best.group;
+      handleGroupSelectChange();
+    }
+    const unitLabel = best.unit ? UNIT_LABELS[best.unit]||best.unit : '₹1 spent';
+    resultEl.textContent = `Matched to "${best.name}" (${best.category} → ${best.group}) → factor set to ${best.factor} kg CO₂e per ${unitLabel}. You can add it as-is or tweak it.`;
+  } else {
+    const fallback = getCarbonFactor(category);
+    factorField.value = fallback;
+    unitField.value = '';
+    resultEl.textContent = `Couldn't find a close match, so using the ${category} category average: ${fallback} kg CO₂e per ₹1 spent. Feel free to adjust it.`;
+  }
+}
+
+async function initBert(){
+  updateBertStatus('loading');
+  try{
+    const ok = await window.__bertReady;
+    if(!ok){ updateBertStatus('unavailable'); return; }
+    const fresh = {};
+    for(const t of CHAT_TOPICS){
+      const vecs = await Promise.all(t.examples.map(e => window.__bertEmbed(e)));
+      fresh[t.key] = averageVectors(vecs);
+    }
+    topicEmbeddings = fresh;
+    updateBertStatus('ready');
+    await computeCategoryEmbeddings();
+    await computeItemEmbeddings();
+  }catch(e){
+    console.error('BERT init failed:', e);
+    updateBertStatus('unavailable');
+  }
+}
+
+async function suggestCategoryFromNotes(){
+  const suggWrap = document.getElementById('categorySuggestWrap');
+  if(!suggWrap) return;
+  const text = document.getElementById('entryNotes').value.trim();
+  const currentSelected = document.getElementById('entryCategory').value;
+  if(entryType!=='expense' || text.length<3 || bertStatus!=='ready' || !categoryEmbeddings){
+    suggWrap.style.display='none';
+    return;
+  }
+  try{
+    const vec = await window.__bertEmbed(text);
+    let best=null, bestScore=-1;
+    for(const cat in categoryEmbeddings){
+      const score = cosineSim(vec, categoryEmbeddings[cat]);
+      if(score>bestScore){ bestScore=score; best=cat; }
+    }
+    if(best && bestScore>0.30 && best!==currentSelected){
+      suggWrap.innerHTML = `💡 Looks like <strong>${best}</strong> —
+        <button class="spine-btn" style="padding:3px 10px; display:inline-block; color:var(--pine); border-color:var(--line);" onclick="applySuggestedCategory('${best}')">Use this category</button>`;
+      suggWrap.style.display='block';
+    } else {
+      suggWrap.style.display='none';
+    }
+  }catch(e){ suggWrap.style.display='none'; }
+}
+function applySuggestedCategory(cat){
+  document.getElementById('entryCategory').value = cat;
+  document.getElementById('categorySuggestWrap').style.display='none';
+}
+
+let notesDebounceTimer = null;
+document.getElementById('entryNotes').addEventListener('input', function(){
+  clearTimeout(notesDebounceTimer);
+  notesDebounceTimer = setTimeout(suggestCategoryFromNotes, 600);
+});
+
+/* ================= Chatbot ================= */
+
+// Layer 1: small talk — greetings, thanks, "who are you" (instant, no model needed)
+function trySmallTalk(text){
+  const t = text.toLowerCase().trim();
+  if(!t) return "Type a question and press Send — try 'how much did I spend this month' or 'how to cut food carbon'.";
+  if(/^(hi|hello|hey|namaste|hii+|yo)\b/.test(t))
+    return "Hi! Ask me about saving money, cutting carbon, your own numbers, or how a feature in this app works.";
+  if(/\b(thank you|thanks|dhanyawad|shukriya)\b/.test(t))
+    return "You're welcome! Ask me anything else, anytime.";
+  if(t.includes('who are you') || t.includes('what can you do') || t.includes('what is this app') || t.includes('about this app'))
+    return "I'm the ECO Budget assistant. I can explain eco-finance topics (transport, food, bills, investing, waste, water...), answer questions about your own income/expense/carbon numbers, or explain how a feature in this app works — just ask.";
+  return null;
+}
+
+// Layer 2: app-help — deterministic answers about how ECO Budget itself works
+function tryAppHelp(text){
+  const t = text.toLowerCase();
+  const has = words => words.some(w=>wordInText(t, w));
+  if(has(['eco score','what is eco score','how is eco score']))
+    return "Your Eco Score (0–100) blends how much of your income you're saving with how close you are to your carbon target, weighted by the Goal Style you pick in the sidebar (Balanced / Save Money / Eco-first).";
+  if(has(['star','how are stars']))
+    return "Stars reward hitting your Monthly Savings Target: they fill up based on what % of that target you've reached for the selected period, up to 5 stars at 100% or more.";
+  if(has(['how is carbon calculated','carbon factor','how carbon works','how is carbon calc']))
+    return "Carbon is estimated as: Amount Spent (₹) × Carbon Factor of that category (kg CO₂e per ₹1 spent). You can view and set the factor for any category you add on the Add Income/Expense tab.";
+  if(has(['add category','custom category','new category','manage categor']))
+    return "Open the Add Income/Expense tab, use the 'Manage Categories' card at the top, pick Income Source or Expense Category, give it a name (and a carbon factor for expenses), then Add Category.";
+  if(has(['change password','forgot password','reset password']))
+    return "There's no password reset yet — make sure you're using the exact email and password you registered with (it's case-sensitive for the password).";
+  return null;
+}
+
+// Layer 3: live-data answers — computed from the user's own transactions for
+// whichever period (Day/Month/Year) is currently selected, so the answer is
+// always accurate to what's actually in the ledger right now.
+function tryDataAnswer(text){
+  const t = text.toLowerCase();
+  const has = words => words.some(w=>wordInText(t, w));
+  const mentionsOwnData = has(['my income','my expense','my spend','my saving','my carbon','my emission','how much did i','how much have i','top categor','highest spend','highest carbon','which categor']);
+  if(!mentionsOwnData) return null;
+  if(!currentUser) return "Log in first, then ask me about your own numbers.";
+
+  const list = periodTxns();
+  const income = list.filter(x=>x.type==='income').reduce((s,x)=>s+x.amount,0);
+  const expense = list.filter(x=>x.type==='expense').reduce((s,x)=>s+x.amount,0);
+  const carbon = list.filter(x=>x.type==='expense').reduce((s,x)=>s+x.carbon,0);
+  const savings = income - expense;
+  const periodWord = period==='day' ? 'today' : period==='month' ? 'this month' : 'this year';
+
+  if(has(['top categor','highest spend','which categor'])){
+    const cats={};
+    list.filter(x=>x.type==='expense').forEach(x=>{ cats[x.category]=(cats[x.category]||0)+x.amount; });
+    const keys=Object.keys(cats);
+    if(!keys.length) return `You haven't logged any expenses ${periodWord} yet.`;
+    const top = keys.reduce((a,b)=>cats[a]>=cats[b]?a:b);
+    return `Your highest-spend category ${periodWord} is ${top}, at ₹${Math.round(cats[top]).toLocaleString('en-IN')}.`;
+  }
+  if(has(['highest carbon'])){
+    const cats={};
+    list.filter(x=>x.type==='expense').forEach(x=>{ cats[x.category]=(cats[x.category]||0)+x.carbon; });
+    const keys=Object.keys(cats);
+    if(!keys.length) return `You haven't logged any expenses ${periodWord} yet.`;
+    const top = keys.reduce((a,b)=>cats[a]>=cats[b]?a:b);
+    return `Your highest-carbon category ${periodWord} is ${top}, at ${cats[top].toFixed(1)} kg CO₂e.`;
+  }
+  if(has(['my carbon','my emission']))
+    return `Your carbon footprint ${periodWord} is ${carbon.toFixed(1)} kg CO₂e.`;
+  if(has(['my saving']))
+    return `Your net savings ${periodWord}: ₹${Math.round(savings).toLocaleString('en-IN')} (Income ₹${Math.round(income).toLocaleString('en-IN')} minus Expense ₹${Math.round(expense).toLocaleString('en-IN')}).`;
+  if(has(['my income']))
+    return `Your income ${periodWord} is ₹${Math.round(income).toLocaleString('en-IN')}.`;
+  if(has(['my expense','my spend','how much did i spend','how much have i spent']))
+    return `Your expenses ${periodWord}: ₹${Math.round(expense).toLocaleString('en-IN')}.`;
+
+  return null;
+}
+
+// Layer 4 (fallback when the model can't load, e.g. offline): plain keyword
+// matching over the same topic set, so the assistant still works without BERT.
+function wordInText(text, phrase){
+  const esc = phrase.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&');
+  return new RegExp('(^|[^a-z0-9])' + esc + '([^a-z0-9]|$)', 'i').test(text);
+}
+function getSuggestion(message){
+  const text = (message||'').toLowerCase().trim();
+  const smallTalk = trySmallTalk(text);
+  if(smallTalk) return smallTalk;
+  const has = words => words.some(w=>wordInText(text, w));
+
+  // Check 'carbon' topic before 'transport' so a question about carbon itself
+  // (which often contains words like "car...") is never shadowed.
+  const orderedTopics = [...CHAT_TOPICS].sort((a,b) => (a.key==='carbon'?-1:0) - (b.key==='carbon'?-1:0));
+  for(const topic of orderedTopics){
+    const kw = {
+      transport:["transport","cab","uber","ola","bike","bus","car","travel","petrol","fuel"],
+      food:["food","eat","zomato","swiggy","restaurant","meal","grocery"],
+      bills:["bill","electricity","current","power","ac","fan","light","rent"],
+      shopping:["shopping","clothes","dress","shirt","buy","online","amazon","flipkart"],
+      savings:["save money","savings","less spend","budget","income","earn"],
+      carbon:["carbon","footprint","co2","co₂","pollution","emission","emissions"],
+      investment:["invest","mutual fund","sip","stock","share market","fd","fixed deposit"],
+      debt:["debt","loan","emi","credit card"],
+      water:["water","tap","shower","leak"],
+      waste:["waste","garbage","plastic","recycle","compost"],
+      renewable:["solar","renewable","rooftop panel"]
+    }[topic.key] || [];
+    if(has(kw)) return topic.reply;
+  }
+  return "I couldn't find an exact match for that, but here's general guidance:\n\n- Track where most of your money goes\n- Cut 10–20% from your least important spending category\n- Reduce high-carbon habits like cabs and eating out\n- Try rephrasing your question — I can also answer things like 'how much did I spend this month'";
+}
+
+let chatHistory = []; // {role:'user'|'bot', text} — kept in memory for this session only
+function renderChatWindow(){
+  const win = document.getElementById('chatWindow');
+  if(!win) return;
+  if(!chatHistory.length){
+    win.innerHTML = '<p class="chat-empty">No messages yet — ask about eco-living, saving money, or your own spending & carbon numbers.</p>';
+    return;
+  }
+  win.innerHTML = chatHistory.map(m =>
+    `<div class="chat-bubble ${m.role}">${escapeHtml(m.text)}</div>`).join('');
+  win.scrollTop = win.scrollHeight;
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+// Calls the app backend; authentication is required and the Gemini key stays server-side.
+// The backend holds the real Gemini key as a server
+// environment variable and makes the actual Gemini request itself. If the
+// backend isn't running (e.g. this file was just opened directly, without
+// `node server.js`), the fetch fails and we fall back to offline matching.
+async function callBackendAI(question){
+  const list = periodTxns();
+  const income = list.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const carbon = list.filter(t=>t.type==='expense').reduce((s,t)=>s+t.carbon,0);
+  const context = `income ₹${income}, expenses ₹${expense}, estimated carbon ${carbon.toFixed(1)} kg CO₂e (current period)`;
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${authToken}` },
+    body: JSON.stringify({ question, context, history: chatHistory.filter(m=>m.text !== '…thinking…').slice(0, -1).slice(-10).map(m=>({role:m.role==='bot'?'model':'user',text:m.text})) })
+  });
+  if(!res.ok){
+    const errBody = await res.json().catch(()=>({}));
+    throw new Error(`Backend AI request failed (${res.status}): ${errBody.error||''}`);
+  }
+  const data = await res.json();
+  if(!data.reply) throw new Error('Empty reply from backend');
+  return data.reply;
+}
+
+async function askChatbot(){
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if(!q) return;
+  chatHistory.push({role:'user', text:q});
+  input.value = '';
+  chatHistory.push({role:'bot', text:'…thinking…'});
+  renderChatWindow();
+  const sendBtn = document.querySelector('.chat-input-row .btn');
+  if(sendBtn) sendBtn.disabled = true;
+  let reply = null;
+  try {
+    // Use the full AI assistant first so unfamiliar/general questions are answered too.
+    reply = await callBackendAI(q);
+  } catch(e) {
+    console.error('Backend AI call failed:', e);
+    // Local responses are only a fallback when the server/AI cannot be reached.
+    reply = trySmallTalk(q) || tryAppHelp(q) || tryDataAnswer(q);
+    if(reply === null && bertStatus==='ready' && topicEmbeddings){
+      try {
+        const qVec = await window.__bertEmbed(q); let best=null, bestScore=-1;
+        for(const key in topicEmbeddings){ const score=cosineSim(qVec,topicEmbeddings[key]); if(score>bestScore){bestScore=score;best=key;} }
+        if(bestScore>0.35) reply = CHAT_TOPICS.find(t=>t.key===best)?.reply || null;
+      } catch(_) {}
+    }
+    if(reply === null) reply = getSuggestion(q) + '\n\n(Offline fallback: start the backend and configure GEMINI_API_KEY for full AI answers.)';
+  }
+  const thinkingIndex = chatHistory.findIndex(m=>m.role==='bot' && m.text==='…thinking…');
+  if(thinkingIndex >= 0) chatHistory.splice(thinkingIndex,1);
+  chatHistory.push({role:'bot', text:reply});
+  renderChatWindow();
+  if(sendBtn) sendBtn.disabled = false;
+}
+
+/* init */
+switchAuthTab('login');
+initBert();
+(async function restoreVerifiedSession(){
+  if(!authToken) return;
+  try {
+    const res = await fetch('/api/auth/me', {headers:{'Authorization':`Bearer ${authToken}`}});
+    if(!res.ok) throw new Error('Session expired');
+    const data = await res.json(); currentUser = data.user; await enterApp();
+  } catch(e) { authToken=''; currentUser=null; localStorage.removeItem('eco_budget_token'); }
+})();
+</script>
+</body>
+</html>
